@@ -30,3 +30,6 @@ let omarchy_bin = ($env.HOME | path join ".local" "share" "omarchy" "bin")
 if ($omarchy_bin | path exists) {
     $env.PATH = ($env.PATH | split row (char esep) | prepend $omarchy_bin)
 }
+
+# NVM setup
+$env.NVM_DIR = ($env.HOME | path join ".nvm")

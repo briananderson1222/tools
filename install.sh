@@ -303,6 +303,28 @@ install_tools() {
         fi
     fi
 
+    # Install NVM (Node Version Manager)
+    if [[ ! -d "$HOME/.nvm" ]] && ! command -v nvm &>/dev/null; then
+        log_info "Installing NVM (Node Version Manager)..."
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash || \
+            log_warning "Failed to install NVM"
+
+        # Source NVM to make it available immediately
+        export NVM_DIR="$HOME/.nvm"
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+    else
+        log_info "NVM already installed"
+    fi
+
+    # Install UV (fast Python package manager)
+    if ! command -v uv &>/dev/null; then
+        log_info "Installing UV (Python package manager)..."
+        curl -LsSf https://astral.sh/uv/install.sh | sh || \
+            log_warning "Failed to install UV"
+    else
+        log_info "UV already installed"
+    fi
+
     # Platform-specific tools
     if [[ "$platform" == "linux" ]] && is_wayland; then
         # Install waybar (Wayland bar)

@@ -57,6 +57,8 @@ The install script uses a universal installation approach via Cargo and Go, ensu
 
 #### Special Installers
 - **atuin** - Shell history sync (uses official installer)
+- **NVM** - Node Version Manager (uses official installer)
+- **UV** - Fast Python package manager (uses official installer)
 
 #### Fonts
 - **JetBrainsMono Nerd Font** - Installed automatically across all platforms
