@@ -64,7 +64,11 @@ copy_config() {
     mkdir -p "$(dirname "$dest")"
 
     if [[ -d "$src" ]]; then
-        cp -r "$src" "$dest"
+        # Copy directory, follow symlinks, skip broken ones
+        cp -rL "$src" "$dest" 2>/dev/null || {
+            # If -L fails (broken symlinks), try without following symlinks but skip broken ones
+            cp -r "$src" "$dest" || log_warning "Some files in $src could not be copied (broken symlinks?)"
+        }
         log_success "Copied directory: $src -> $dest"
     else
         cp "$src" "$dest"

@@ -1,4 +1,24 @@
-# 💤 LazyVim
+# Neovim Configuration
 
-A starter template for [LazyVim](https://github.com/LazyVim/LazyVim).
-Refer to the [documentation](https://lazyvim.github.io/installation) to get started.
+LazyVim-based configuration.
+
+## Omarchy Theme Integration
+
+On Arch Linux with Omarchy + Hyprland, the theme is managed by Omarchy:
+
+```bash
+# Create symlink to Omarchy theme (Arch + Hyprland only)
+ln -sf ~/.config/omarchy/current/theme/neovim.lua \
+       ~/.config/nvim/lua/plugins/theme.lua
+```
+
+This symlink is gitignored and needs to be recreated on Omarchy systems.
+
+## Non-Omarchy Systems
+
+Edit `lua/plugins/theme.lua` to configure your preferred colorscheme.
+
+Example themes:
+- Tokyonight: Already available in LazyVim
+- Catppuccin: Add to `lua/plugins/theme.lua`
+- Default: Returns empty config to use LazyVim defaults

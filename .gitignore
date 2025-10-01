@@ -13,6 +13,9 @@ config/atuin/atuin-receipt.json
 *.lock
 *.json.lock
 
+# Omarchy-specific symlinks (only on Arch + Hyprland)
+config/nvim/lua/plugins/theme.lua
+
 # Fish shell generated files
 config/fish/fish_variables
 
