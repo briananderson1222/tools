@@ -31,6 +31,15 @@ The install script automatically detects:
 - **Standard desktop environments** (Ubuntu, other distros)
 - **macOS** native environment
 
+### Platform-Specific Configs
+
+**Omarchy-specific configs (Arch + Wayland/Hyprland only):**
+- `config/hypr/*` - References Omarchy theme system
+- `config/waybar/*` - References Omarchy fonts and styling
+- Shell dotfiles check for Omarchy and source conditionally
+
+**These configs gracefully degrade on non-Omarchy systems.**
+
 ### Writing Platform-Specific Code
 
 ```bash

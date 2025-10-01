@@ -8,6 +8,11 @@ Thumbs.db
 # Sensitive data
 config/atuin/key
 
+# Generated files
+config/atuin/atuin-receipt.json
+*.lock
+*.json.lock
+
 # Fish shell generated files
 config/fish/fish_variables
 

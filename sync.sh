@@ -48,6 +48,8 @@ EXCLUDE_PATTERNS=(
     "plugin/"
     "*.sqlite*"
     "session.txt"
+    "README.md"
+    "*-receipt.json"
 )
 
 # Build rsync exclude args

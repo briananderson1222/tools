@@ -1,14 +1,20 @@
-# All the default Omarchy aliases and functions
-# (don't mess with these directly, just overwrite them here!)
-source ~/.local/share/omarchy/default/bash/rc
+# Source Omarchy defaults if available (Arch + Hyprland only)
+[[ -f ~/.local/share/omarchy/default/bash/rc ]] && source ~/.local/share/omarchy/default/bash/rc
 
-# Add your own exports, aliases, and functions here.
-source /usr/share/nvm/init-nvm.sh &>/dev/null
-#
-# Make an alias for invoking commands you use constantly
-# alias p='python'
+# Add Rust/Cargo to PATH
+[[ -f "$HOME/.cargo/env" ]] && source "$HOME/.cargo/env"
 
-. "$HOME/.atuin/bin/env"
+# Add Go to PATH
+export PATH="$PATH:/usr/local/go/bin:$HOME/go/bin"
 
+# NVM setup (optional - install location varies by distro)
+[[ -f /usr/share/nvm/init-nvm.sh ]] && source /usr/share/nvm/init-nvm.sh &>/dev/null
+[[ -f ~/.nvm/nvm.sh ]] && source ~/.nvm/nvm.sh &>/dev/null
+
+# Atuin shell history
+[[ -f "$HOME/.atuin/bin/env" ]] && . "$HOME/.atuin/bin/env"
 [[ -f ~/.bash-preexec.sh ]] && source ~/.bash-preexec.sh
-eval "$(atuin init bash)"
+command -v atuin &>/dev/null && eval "$(atuin init bash)"
+
+# Add your own aliases and functions here
+# alias p='python'
