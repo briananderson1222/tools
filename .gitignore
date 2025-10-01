@@ -23,3 +23,9 @@ config/fish/fish_variables
 config/nvim/plugin/
 config/nvim/.lazy/
 config/nvim/lazy-lock.json
+
+# Shell history files
+config/nushell/history.txt
+
+# Generated example configs
+config/ghostty/examples/
