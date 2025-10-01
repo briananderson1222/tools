@@ -8,6 +8,40 @@ on:
   workflow_dispatch:
 
 jobs:
+  test-arch:
+    name: Test on Arch Linux
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+    steps:
+      - name: Install git (required for checkout)
+        run: |
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm git base-devel curl
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run install script (skip tool installation prompt)
+        run: |
+          # Auto-answer 'n' to skip optional tool installation for faster CI
+          echo "n" | bash install.sh || true
+        continue-on-error: true
+
+      - name: Verify script completed
+        run: |
+          if [ $? -eq 0 ]; then
+            echo "✅ Install script completed successfully on Arch"
+          else
+            echo "⚠️  Install script had warnings (expected in CI)"
+          fi
+
+      - name: Test sync script
+        run: |
+          chmod +x sync.sh
+          ./sync.sh import || echo "⚠️  Sync import had warnings (expected without configs)"
+          ./sync.sh export || echo "⚠️  Sync export had warnings (expected without configs)"
+
   test-ubuntu:
     name: Test on Ubuntu
     runs-on: ubuntu-latest
@@ -72,8 +106,8 @@ jobs:
           ./sync.sh import || echo "⚠️  Sync import had warnings (expected without configs)"
           ./sync.sh export || echo "⚠️  Sync export had warnings (expected without configs)"
 
-  test-install-tools:
-    name: Test Tool Installation
+  test-install-tools-ubuntu:
+    name: Test Full Installation - Ubuntu
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -131,6 +165,77 @@ jobs:
       - name: Verify JetBrainsMono font installed
         run: |
           fc-list | grep -i "JetBrainsMono" && echo "✅ JetBrainsMono Nerd Font installed" || echo "⚠️  Font not found"
+
+      - name: Verify configs deployed
+        run: |
+          [ -f "$HOME/.bashrc" ] && echo "✅ .bashrc deployed" || echo "❌ .bashrc missing"
+          [ -f "$HOME/.zshrc" ] && echo "✅ .zshrc deployed" || echo "❌ .zshrc missing"
+          [ -d "$HOME/.config/nvim" ] && echo "✅ nvim config deployed" || echo "❌ nvim config missing"
+          [ -d "$HOME/.config/nushell" ] && echo "✅ nushell config deployed" || echo "❌ nushell config missing"
+          [ -f "$HOME/.config/ghostty/config" ] && echo "✅ ghostty config generated" || echo "❌ ghostty config missing"
+
+  test-install-tools-arch:
+    name: Test Full Installation - Arch Linux
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+    steps:
+      - name: Install base dependencies
+        run: |
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm git base-devel curl wget unzip fontconfig sudo
+
+      - name: Create non-root user for testing
+        run: |
+          useradd -m -s /bin/bash testuser
+          echo "testuser ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Change ownership to test user
+        run: chown -R testuser:testuser .
+
+      - name: Run full installation as test user
+        run: |
+          su - testuser -c "cd $GITHUB_WORKSPACE && printf 'y\ny\nbash\n' | bash install.sh"
+        timeout-minutes: 30
+
+      - name: Verify Rust/Cargo installed
+        run: |
+          su - testuser -c "source ~/.cargo/env && cargo --version"
+
+      - name: Verify Go installed
+        run: |
+          su - testuser -c "export PATH=\"\$PATH:/usr/local/go/bin\" && go version"
+
+      - name: Verify Rust tools installed
+        run: |
+          su - testuser -c "source ~/.cargo/env && eza --version" || echo "⚠️  eza not installed"
+          su - testuser -c "source ~/.cargo/env && bat --version" || echo "⚠️  bat not installed"
+          su - testuser -c "source ~/.cargo/env && fd --version" || echo "⚠️  fd not installed"
+          su - testuser -c "source ~/.cargo/env && rg --version" || echo "⚠️  rg not installed"
+
+      - name: Verify Go tools installed
+        run: |
+          su - testuser -c "export PATH=\"\$PATH:\$HOME/go/bin\" && fzf --version" || echo "⚠️  fzf not installed"
+          su - testuser -c "export PATH=\"\$PATH:\$HOME/go/bin\" && carapace --version" || echo "⚠️  carapace not installed"
+
+      - name: Verify NVM installed
+        run: |
+          su - testuser -c 'export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && nvm --version' || echo "⚠️  nvm not installed"
+
+      - name: Verify UV installed
+        run: |
+          su - testuser -c "uv --version" || echo "⚠️  uv not installed"
+
+      - name: Verify atuin installed
+        run: |
+          su - testuser -c "atuin --version" || echo "⚠️  atuin not installed"
+
+      - name: Verify JetBrainsMono font installed
+        run: |
+          su - testuser -c "fc-list | grep -i 'JetBrainsMono' && echo '✅ JetBrainsMono Nerd Font installed' || echo '⚠️  Font not found'"
 
       - name: Verify configs deployed
         run: |

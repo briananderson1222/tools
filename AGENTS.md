@@ -336,9 +336,10 @@ install_font_name() {
 ### Testing on Multiple Platforms
 
 **GitHub Actions CI:** The repository has automated tests that run on:
-- Ubuntu (latest)
-- macOS (latest)
-- Full installation test with all tools
+- **Arch Linux** (via Docker container) - Primary platform
+- **Ubuntu** (latest) - Debian-based testing
+- **macOS** (latest) - macOS testing
+- Full installation tests with all tools on Arch and Ubuntu
 - Script syntax validation
 - Markdown link checking
 
