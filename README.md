@@ -121,15 +121,17 @@ The script is idempotent - it safely re-runs and updates everything.
 
 This repo uses a **copy-based approach** (not symlinks), so use the sync script to manage changes.
 
-**Requirements:** bash 4.0+ (macOS users: `brew install bash`)
+**Requirements:**
+- bash 4.0+ (macOS: `brew install bash`, adds to PATH automatically)
+- rsync (pre-installed on most systems)
 
 #### Import configs from system to repo:
 ```bash
 cd tools  # or wherever you cloned the repo
 ./sync.sh import
 
-# macOS with default bash 3.2:
-/usr/local/bin/bash sync.sh import
+# macOS with bash 3.2 (after brew install bash):
+bash sync.sh import  # Uses Homebrew bash from PATH
 
 # Then commit and push
 git add .
@@ -141,8 +143,8 @@ git push
 ```bash
 ./sync.sh export
 
-# macOS with default bash 3.2:
-/usr/local/bin/bash sync.sh export
+# macOS with bash 3.2:
+bash sync.sh export
 ```
 
 **Excluded from sync:** Lock files, logs, cache, plugin directories, and other generated files.

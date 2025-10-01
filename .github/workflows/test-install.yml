@@ -14,10 +14,10 @@ jobs:
     container:
       image: archlinux:latest
     steps:
-      - name: Install git (required for checkout)
+      - name: Install git and dependencies (required for checkout)
         run: |
           pacman -Syu --noconfirm
-          pacman -S --noconfirm git base-devel curl
+          pacman -S --noconfirm git base-devel curl rsync
 
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -68,7 +68,10 @@ jobs:
       - name: Install bash 4+ for sync script
         run: |
           brew install bash
-          /usr/local/bin/bash --version
+          # Homebrew on Apple Silicon: /opt/homebrew/bin/bash
+          # Homebrew on Intel: /usr/local/bin/bash
+          which bash
+          bash --version
 
       - name: Install dependencies
         run: |
@@ -84,8 +87,9 @@ jobs:
       - name: Test sync script (with bash 4+)
         run: |
           chmod +x sync.sh
-          /usr/local/bin/bash sync.sh import && echo "✅ Sync import succeeded" || exit 1
-          /usr/local/bin/bash sync.sh export && echo "✅ Sync export succeeded" || exit 1
+          # Use bash from PATH (Homebrew adds it)
+          bash sync.sh import && echo "✅ Sync import succeeded" || exit 1
+          bash sync.sh export && echo "✅ Sync export succeeded" || exit 1
 
   test-install-tools-ubuntu:
     name: Test Full Installation - Ubuntu
@@ -164,7 +168,7 @@ jobs:
       - name: Install base dependencies
         run: |
           pacman -Syu --noconfirm
-          pacman -S --noconfirm git base-devel curl wget unzip fontconfig sudo
+          pacman -S --noconfirm git base-devel curl wget unzip fontconfig sudo rsync
 
       - name: Create non-root user for testing
         run: |

@@ -13,7 +13,30 @@ if [ "${BASH_VERSINFO[0]}" -lt 4 ]; then
     if [[ "$OSTYPE" == "darwin"* ]]; then
         echo "macOS ships with bash 3.2. Install a newer version:"
         echo "  brew install bash"
-        echo "Then run with: /usr/local/bin/bash sync.sh [import|export]"
+        echo ""
+        echo "Then run with bash 4+:"
+        echo "  # Apple Silicon:"
+        echo "  /opt/homebrew/bin/bash sync.sh [import|export]"
+        echo "  # Intel Mac:"
+        echo "  /usr/local/bin/bash sync.sh [import|export]"
+        echo "  # Or add to PATH and use:"
+        echo "  bash sync.sh [import|export]"
+    fi
+    exit 1
+fi
+
+# Check for rsync
+if ! command -v rsync &>/dev/null; then
+    echo "Error: rsync is required but not installed"
+    echo ""
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        echo "macOS should have rsync pre-installed. Please check your installation."
+    elif [[ -f /etc/arch-release ]]; then
+        echo "Install with: sudo pacman -S rsync"
+    elif command -v apt-get &>/dev/null; then
+        echo "Install with: sudo apt-get install rsync"
+    else
+        echo "Please install rsync using your package manager"
     fi
     exit 1
 fi
