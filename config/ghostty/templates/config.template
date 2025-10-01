@@ -1,13 +1,13 @@
 # Dynamic theme colors
-config-file = ?"~/.config/omarchy/current/theme/ghostty.conf"
+{{THEME_CONFIG}}
 
 # Shell
-command = /usr/bin/nu
+command = {{SHELL_PATH}}
 
 # Font
-font-family = "CaskaydiaMono Nerd Font"
+font-family = "JetBrainsMono Nerd Font"
 font-style = Regular
-font-size = 9
+font-size = {{FONT_SIZE}}
 
 # Window
 window-padding-x = 14

@@ -312,9 +312,155 @@ install_tools() {
     log_success "Tool installation complete!"
 }
 
+# Install JetBrainsMono Nerd Font
+install_nerd_font() {
+    local platform="$1"
+    local distro="$2"
+
+    log_info "Installing JetBrainsMono Nerd Font..."
+
+    case "$platform" in
+        macos)
+            if command -v brew &>/dev/null; then
+                brew install --cask font-jetbrains-mono-nerd-font || \
+                    log_warning "Failed to install JetBrainsMono Nerd Font"
+            else
+                log_warning "Homebrew not found. Install from: https://www.nerdfonts.com/font-downloads"
+            fi
+            ;;
+        linux|wsl)
+            local font_dir="$HOME/.local/share/fonts"
+            local font_installed=false
+
+            # Check if font already installed
+            if fc-list | grep -qi "JetBrainsMono Nerd Font"; then
+                log_info "JetBrainsMono Nerd Font already installed"
+                return
+            fi
+
+            # Install via package manager if available
+            case "$distro" in
+                arch|manjaro)
+                    sudo pacman -S --noconfirm ttf-jetbrains-mono-nerd 2>/dev/null || \
+                        yay -S --noconfirm ttf-jetbrains-mono-nerd 2>/dev/null && font_installed=true
+                    ;;
+            esac
+
+            # If not installed via package manager, download manually
+            if [[ "$font_installed" == false ]]; then
+                log_info "Downloading JetBrainsMono Nerd Font..."
+                mkdir -p "$font_dir"
+                local tmp_dir=$(mktemp -d)
+
+                curl -fLo "$tmp_dir/JetBrainsMono.zip" \
+                    https://github.com/ryanoasis/nerd-fonts/releases/download/v3.2.1/JetBrainsMono.zip || {
+                    log_warning "Failed to download font"
+                    rm -rf "$tmp_dir"
+                    return 1
+                }
+
+                unzip -q "$tmp_dir/JetBrainsMono.zip" -d "$font_dir/JetBrainsMono" || {
+                    log_warning "Failed to extract font"
+                    rm -rf "$tmp_dir"
+                    return 1
+                }
+
+                rm -rf "$tmp_dir"
+                fc-cache -fv "$font_dir" >/dev/null 2>&1
+                log_success "JetBrainsMono Nerd Font installed"
+            fi
+            ;;
+    esac
+}
+
+# Detect user's preferred shell
+detect_shell() {
+    local shells=()
+
+    # Check for available shells
+    command -v bash &>/dev/null && shells+=("bash")
+    command -v zsh &>/dev/null && shells+=("zsh")
+    command -v fish &>/dev/null && shells+=("fish")
+    command -v nu &>/dev/null && shells+=("nu")
+
+    # Return current shell if available
+    local current_shell=$(basename "$SHELL")
+    for shell in "${shells[@]}"; do
+        if [[ "$shell" == "$current_shell" ]]; then
+            echo "$current_shell"
+            return
+        fi
+    done
+
+    # Otherwise return first available
+    echo "${shells[0]:-bash}"
+}
+
+# Get shell path
+get_shell_path() {
+    local shell="$1"
+    command -v "$shell" 2>/dev/null || echo "/bin/$shell"
+}
+
+# Generate ghostty config
+generate_ghostty_config() {
+    local shell="$1"
+    local platform="$2"
+
+    local template_file="$CONFIG_DIR/ghostty/templates/config.template"
+    local output_file="$HOME/.config/ghostty/config"
+
+    if [[ ! -f "$template_file" ]]; then
+        log_warning "Ghostty template not found, skipping"
+        return
+    fi
+
+    log_info "Generating ghostty config for shell: $shell"
+
+    # Get shell path
+    local shell_path=$(get_shell_path "$shell")
+
+    # Platform-specific defaults
+    local font_size="9"
+    local theme_config='config-file = ?"~/.config/omarchy/current/theme/ghostty.conf"'
+
+    case "$platform" in
+        macos)
+            font_size="13"
+            theme_config="# No theme config for macOS"
+            ;;
+    esac
+
+    # Generate config from template
+    mkdir -p "$(dirname "$output_file")"
+    sed -e "s|{{SHELL_PATH}}|$shell_path|g" \
+        -e "s|{{FONT_SIZE}}|$font_size|g" \
+        -e "s|{{THEME_CONFIG}}|$theme_config|g" \
+        "$template_file" > "$output_file"
+
+    log_success "Generated ghostty config: $output_file"
+}
+
 # Setup configuration files
 setup_configs() {
+    local platform="$1"
+
     log_info "Setting up configuration files..."
+
+    # Detect preferred shell
+    local preferred_shell=$(detect_shell)
+    log_info "Detected shell: $preferred_shell"
+
+    read -p "Use $preferred_shell as default shell? (y/n, or specify: bash/zsh/fish/nu) " -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        if [[ "$REPLY" =~ ^(bash|zsh|fish|nu)$ ]]; then
+            preferred_shell="$REPLY"
+        fi
+    fi
+
+    # Generate dynamic configs
+    generate_ghostty_config "$preferred_shell" "$platform"
 
     # Symlink dotfiles
     if [[ -d "$DOTFILES_DIR" ]]; then
@@ -331,6 +477,16 @@ setup_configs() {
         for dir in "$CONFIG_DIR"/*; do
             [[ -d "$dir" ]] || continue
             local basename="$(basename "$dir")"
+
+            # Skip templates directory
+            if [[ "$basename" == "templates" ]]; then
+                continue
+            fi
+
+            # Skip ghostty since we generate it
+            if [[ "$basename" == "ghostty" ]]; then
+                continue
+            fi
 
             # Skip waybar on non-Wayland systems
             if [[ "$basename" == "waybar" ]] && ! is_wayland; then
@@ -364,10 +520,11 @@ main() {
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         install_tools "$platform" "$distro"
+        install_nerd_font "$platform" "$distro"
     fi
 
     # Setup configurations
-    setup_configs
+    setup_configs "$platform"
 
     log_success "Dotfiles installation complete!"
     log_info "Note: You may need to restart your shell or source your rc files"
