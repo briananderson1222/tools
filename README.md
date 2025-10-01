@@ -117,31 +117,35 @@ git pull
 
 The script is idempotent - it safely re-runs and updates everything.
 
-### Syncing Your Changes Back to Repo
+### Syncing Your Changes
 
-When you update your configurations locally, sync them back:
+This repo uses a **copy-based approach** (not symlinks), so use the sync script to manage changes.
 
+**Requirements:** bash 4.0+ (macOS users: `brew install bash`)
+
+#### Import configs from system to repo:
 ```bash
 cd tools  # or wherever you cloned the repo
+./sync.sh import
 
-# Copy updated configs (these are symlinked, so may already be up to date)
-cp -r ~/.config/nvim config/
-cp -r ~/.config/waybar config/
-cp -r ~/.config/hypr config/
-cp -r ~/.config/ghostty config/
-cp -r ~/.config/atuin config/
-cp -r ~/.config/nushell config/
-cp ~/.tmux.conf dotfiles/
-cp ~/.bashrc dotfiles/
-cp ~/.bash_profile dotfiles/
+# macOS with default bash 3.2:
+/usr/local/bin/bash sync.sh import
 
-# Commit and push
+# Then commit and push
 git add .
-git commit -m "Update configs"
+git commit -m "feat: update nvim configuration"
 git push
 ```
 
-**Note:** Since the install script creates symlinks, many config changes are automatically reflected in this repo. You only need to copy files if you've recreated them rather than edited them in place.
+#### Export configs from repo to system:
+```bash
+./sync.sh export
+
+# macOS with default bash 3.2:
+/usr/local/bin/bash sync.sh export
+```
+
+**Excluded from sync:** Lock files, logs, cache, plugin directories, and other generated files.
 
 ## Repository Structure
 

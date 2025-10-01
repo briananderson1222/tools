@@ -25,22 +25,14 @@ jobs:
       - name: Run install script (skip tool installation prompt)
         run: |
           # Auto-answer 'n' to skip optional tool installation for faster CI
-          echo "n" | bash install.sh || true
-        continue-on-error: true
-
-      - name: Verify script completed
-        run: |
-          if [ $? -eq 0 ]; then
-            echo "✅ Install script completed successfully on Arch"
-          else
-            echo "⚠️  Install script had warnings (expected in CI)"
-          fi
+          echo "n" | bash install.sh
+          echo "✅ Install script completed successfully on Arch"
 
       - name: Test sync script
         run: |
           chmod +x sync.sh
-          ./sync.sh import || echo "⚠️  Sync import had warnings (expected without configs)"
-          ./sync.sh export || echo "⚠️  Sync export had warnings (expected without configs)"
+          ./sync.sh import && echo "✅ Sync import succeeded" || exit 1
+          ./sync.sh export && echo "✅ Sync export succeeded" || exit 1
 
   test-ubuntu:
     name: Test on Ubuntu
@@ -57,22 +49,14 @@ jobs:
       - name: Run install script (skip tool installation prompt)
         run: |
           # Auto-answer 'n' to skip optional tool installation for faster CI
-          echo "n" | bash install.sh || true
-        continue-on-error: true
-
-      - name: Verify script completed
-        run: |
-          if [ $? -eq 0 ]; then
-            echo "✅ Install script completed successfully"
-          else
-            echo "⚠️  Install script had warnings (expected in CI)"
-          fi
+          echo "n" | bash install.sh
+          echo "✅ Install script completed successfully on Ubuntu"
 
       - name: Test sync script
         run: |
           chmod +x sync.sh
-          ./sync.sh import || echo "⚠️  Sync import had warnings (expected without configs)"
-          ./sync.sh export || echo "⚠️  Sync export had warnings (expected without configs)"
+          ./sync.sh import && echo "✅ Sync import succeeded" || exit 1
+          ./sync.sh export && echo "✅ Sync export succeeded" || exit 1
 
   test-macos:
     name: Test on macOS
@@ -80,6 +64,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Install bash 4+ for sync script
+        run: |
+          brew install bash
+          /usr/local/bin/bash --version
 
       - name: Install dependencies
         run: |
@@ -89,22 +78,14 @@ jobs:
       - name: Run install script (skip tool installation prompt)
         run: |
           # Auto-answer 'n' to skip optional tool installation for faster CI
-          echo "n" | bash install.sh || true
-        continue-on-error: true
+          echo "n" | bash install.sh
+          echo "✅ Install script completed successfully on macOS"
 
-      - name: Verify script completed
-        run: |
-          if [ $? -eq 0 ]; then
-            echo "✅ Install script completed successfully"
-          else
-            echo "⚠️  Install script had warnings (expected in CI)"
-          fi
-
-      - name: Test sync script
+      - name: Test sync script (with bash 4+)
         run: |
           chmod +x sync.sh
-          ./sync.sh import || echo "⚠️  Sync import had warnings (expected without configs)"
-          ./sync.sh export || echo "⚠️  Sync export had warnings (expected without configs)"
+          /usr/local/bin/bash sync.sh import && echo "✅ Sync import succeeded" || exit 1
+          /usr/local/bin/bash sync.sh export && echo "✅ Sync export succeeded" || exit 1
 
   test-install-tools-ubuntu:
     name: Test Full Installation - Ubuntu

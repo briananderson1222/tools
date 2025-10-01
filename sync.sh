@@ -1,9 +1,22 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Two-way sync script for dotfiles
 # Usage: ./sync.sh [import|export]
 
 set -e
+
+# Check bash version (need 4.0+ for associative arrays)
+if [ "${BASH_VERSINFO[0]}" -lt 4 ]; then
+    echo "Error: This script requires bash 4.0 or higher"
+    echo "Current version: $BASH_VERSION"
+    echo ""
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        echo "macOS ships with bash 3.2. Install a newer version:"
+        echo "  brew install bash"
+        echo "Then run with: /usr/local/bin/bash sync.sh [import|export]"
+    fi
+    exit 1
+fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_DIR="$SCRIPT_DIR/config"
