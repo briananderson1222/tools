@@ -21,15 +21,6 @@
 $env.PATH = ($env.PATH | split row (char esep) | prepend [
     ($env.HOME | path join ".local" "bin")
     ($env.HOME | path join ".atuin" "bin")
-    ($env.HOME | path join ".cargo" "bin")
-    ($env.HOME | path join "go" "bin")
+    ($env.HOME | path join ".config" "nvm" "versions" "node" "v22.20.0" "bin")
+    ($env.HOME | path join ".local" "share" "omarchy" "bin")
 ])
-
-# Add Omarchy bin if it exists (Arch + Hyprland only)
-let omarchy_bin = ($env.HOME | path join ".local" "share" "omarchy" "bin")
-if ($omarchy_bin | path exists) {
-    $env.PATH = ($env.PATH | split row (char esep) | prepend $omarchy_bin)
-}
-
-# NVM setup
-$env.NVM_DIR = ($env.HOME | path join ".nvm")

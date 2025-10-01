@@ -19,3 +19,10 @@
 
 # Atuin shell history
 source ~/.local/share/atuin/init.nu
+
+# Claude Code command with 10-minute bash timeout
+def c [...args] {
+  with-env {BASH_DEFAULT_TIMEOUT_MS: "600000", BASH_MAX_TIMEOUT_MS: "600000"} {
+    claude ...$args
+  }
+}
