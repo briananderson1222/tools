@@ -1,0 +1,17 @@
+# Backup files
+*.backup
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Sensitive data
+config/atuin/key
+
+# Fish shell generated files
+config/fish/fish_variables
+
+# Plugin directories that should be installed fresh
+config/nvim/plugin/
+config/nvim/.lazy/
+config/nvim/lazy-lock.json
