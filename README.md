@@ -22,8 +22,8 @@ cd ~/dev/briananderson1222/tools
 - **Tmux** - Terminal multiplexer configuration
 - **Waybar** - Status bar for Wayland compositors (Linux Wayland only)
 - **Hyprland** - Wayland compositor configuration (Linux Wayland only)
-- **Kitty** - Terminal emulator configuration
-- **Fish** - Fish shell configuration
+- **Ghostty** - Modern terminal emulator configuration
+- **Nushell** - Modern shell configuration
 - **Bash/Zsh** - Shell configurations with atuin integration
 - **Atuin** - Shell history sync configuration
 
@@ -35,7 +35,6 @@ The install script uses a universal installation approach via Cargo and Go, ensu
 - **git** - Version control
 - **tmux** - Terminal multiplexer
 - **neovim** - Modern Vim-based editor
-- **fish** - Friendly interactive shell
 - **curl/wget** - Download tools
 - **waybar** - Status bar (Linux Wayland only)
 
@@ -117,9 +116,9 @@ cd ~/dev/briananderson1222/tools
 cp -r ~/.config/nvim config/
 cp -r ~/.config/waybar config/
 cp -r ~/.config/hypr config/
-cp -r ~/.config/kitty config/
+cp -r ~/.config/ghostty config/
 cp -r ~/.config/atuin config/
-cp -r ~/.config/fish config/
+cp -r ~/.config/nushell config/
 cp ~/.tmux.conf dotfiles/
 cp ~/.bashrc dotfiles/
 cp ~/.bash_profile dotfiles/
@@ -143,9 +142,9 @@ git push
 │   ├── nvim/         # Neovim configuration (LazyVim)
 │   ├── waybar/       # Waybar status bar config
 │   ├── hypr/         # Hyprland compositor config
-│   ├── kitty/        # Kitty terminal config
+│   ├── ghostty/      # Ghostty terminal config
 │   ├── atuin/        # Atuin shell history config
-│   └── fish/         # Fish shell config
+│   └── nushell/      # Nushell configuration
 └── dotfiles/          # Home directory dotfiles
     ├── .tmux.conf    # Tmux configuration
     ├── .bashrc       # Bash configuration
@@ -183,17 +182,14 @@ export PATH="$PATH:/usr/local/go/bin:$HOME/go/bin"
 eval "$(atuin init zsh)"
 ```
 
-### For Fish (~/.config/fish/config.fish)
-```fish
+### For Nushell (~/.config/nushell/env.nu)
+```nu
 # Rust/Cargo
-source "$HOME/.cargo/env.fish"
+$env.PATH = ($env.PATH | split row (char esep) | prepend $"($env.HOME)/.cargo/bin")
 
 # Go binaries
-fish_add_path /usr/local/go/bin
-fish_add_path $HOME/go/bin
-
-# Atuin
-atuin init fish | source
+$env.PATH = ($env.PATH | split row (char esep) | prepend "/usr/local/go/bin")
+$env.PATH = ($env.PATH | split row (char esep) | prepend $"($env.HOME)/go/bin")
 ```
 
 Most of these are already included in the dotfiles provided.

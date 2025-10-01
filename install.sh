@@ -300,11 +300,6 @@ install_tools() {
         fi
     fi
 
-    # Install fish shell (from package manager)
-    if ! command -v fish &>/dev/null; then
-        install_package "fish" "$platform" "$distro"
-    fi
-
     # Platform-specific tools
     if [[ "$platform" == "linux" ]] && is_wayland; then
         # Install waybar (Wayland bar)
