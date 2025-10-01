@@ -215,7 +215,7 @@ install_tools() {
     log_info "Installing essential tools..."
 
     # Install system packages (better from package managers)
-    local system_tools=("tmux" "git" "curl" "wget" "build-essential")
+    local system_tools=("tmux" "git" "curl" "wget" "rsync" "build-essential")
 
     for tool in "${system_tools[@]}"; do
         # Skip build-essential on non-Debian systems

@@ -38,6 +38,7 @@ The install script uses a universal installation approach via Cargo and Go, ensu
 - **tmux** - Terminal multiplexer
 - **neovim** - Modern Vim-based editor
 - **curl/wget** - Download tools
+- **rsync** - File synchronization tool (required for sync script)
 - **waybar** - Status bar (Linux Wayland only)
 
 #### Rust/Cargo Tools (universal installation)
@@ -123,7 +124,7 @@ This repo uses a **copy-based approach** (not symlinks), so use the sync script 
 
 **Requirements:**
 - bash 4.0+ (macOS: `brew install bash`, adds to PATH automatically)
-- rsync (pre-installed on most systems)
+- rsync (installed automatically by install.sh)
 
 #### Import configs from system to repo:
 ```bash
