@@ -50,23 +50,26 @@ is_wayland() {
     [[ -n "$WAYLAND_DISPLAY" ]] || [[ "$XDG_SESSION_TYPE" == "wayland" ]]
 }
 
-# Create symlink with backup
-create_symlink() {
+# Copy file/directory with backup
+copy_config() {
     local src="$1"
     local dest="$2"
 
+    # Backup existing config
     if [[ -e "$dest" ]] || [[ -L "$dest" ]]; then
-        if [[ -L "$dest" ]] && [[ "$(readlink "$dest")" == "$src" ]]; then
-            log_info "Symlink already exists: $dest"
-            return 0
-        fi
-        log_warning "Backing up existing file: $dest -> ${dest}.backup"
+        log_warning "Backing up existing: $dest -> ${dest}.backup"
         mv "$dest" "${dest}.backup"
     fi
 
     mkdir -p "$(dirname "$dest")"
-    ln -s "$src" "$dest"
-    log_success "Created symlink: $dest -> $src"
+
+    if [[ -d "$src" ]]; then
+        cp -r "$src" "$dest"
+        log_success "Copied directory: $src -> $dest"
+    else
+        cp "$src" "$dest"
+        log_success "Copied file: $src -> $dest"
+    fi
 }
 
 # Ensure Rust/Cargo is installed
@@ -380,7 +383,6 @@ detect_shell() {
     # Check for available shells
     command -v bash &>/dev/null && shells+=("bash")
     command -v zsh &>/dev/null && shells+=("zsh")
-    command -v fish &>/dev/null && shells+=("fish")
     command -v nu &>/dev/null && shells+=("nu")
 
     # Return current shell if available
@@ -451,10 +453,10 @@ setup_configs() {
     local preferred_shell=$(detect_shell)
     log_info "Detected shell: $preferred_shell"
 
-    read -p "Use $preferred_shell as default shell? (y/n, or specify: bash/zsh/fish/nu) " -r
+    read -p "Use $preferred_shell as default shell? (y/n, or specify: bash/zsh/nu) " -r
     echo
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        if [[ "$REPLY" =~ ^(bash|zsh|fish|nu)$ ]]; then
+        if [[ "$REPLY" =~ ^(bash|zsh|nu)$ ]]; then
             preferred_shell="$REPLY"
         fi
     fi
@@ -462,17 +464,17 @@ setup_configs() {
     # Generate dynamic configs
     generate_ghostty_config "$preferred_shell" "$platform"
 
-    # Symlink dotfiles
+    # Copy dotfiles
     if [[ -d "$DOTFILES_DIR" ]]; then
         for file in "$DOTFILES_DIR"/.*; do
             [[ -f "$file" ]] || continue
             local basename="$(basename "$file")"
             [[ "$basename" == "." || "$basename" == ".." ]] && continue
-            create_symlink "$file" "$HOME/$basename"
+            copy_config "$file" "$HOME/$basename"
         done
     fi
 
-    # Symlink config directories
+    # Copy config directories
     if [[ -d "$CONFIG_DIR" ]]; then
         for dir in "$CONFIG_DIR"/*; do
             [[ -d "$dir" ]] || continue
@@ -500,7 +502,7 @@ setup_configs() {
                 continue
             fi
 
-            create_symlink "$dir" "$HOME/.config/$basename"
+            copy_config "$dir" "$HOME/.config/$basename"
         done
     fi
 }

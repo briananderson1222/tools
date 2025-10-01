@@ -7,8 +7,8 @@ Personal configuration files and setup scripts for Unix-based systems (Linux, ma
 Clone this repository and run the install script:
 
 ```bash
-git clone https://github.com/briananderson1222/tools.git ~/dev/briananderson1222/tools
-cd ~/dev/briananderson1222/tools
+git clone https://github.com/briananderson1222/tools.git
+cd tools
 ./install.sh
 ```
 
@@ -58,20 +58,28 @@ The install script uses a universal installation approach via Cargo and Go, ensu
 #### Special Installers
 - **atuin** - Shell history sync (uses official installer)
 
+#### Fonts
+- **JetBrainsMono Nerd Font** - Installed automatically across all platforms
+  - macOS: via Homebrew cask
+  - Arch/Manjaro: via pacman/yay
+  - Other distros: Downloaded from GitHub releases
+
 ## Platform Support
 
 The install script automatically detects your platform and architecture:
 
 ### Supported Platforms
-- **Linux** (Arch, Ubuntu, Debian, Fedora, Manjaro)
-- **macOS** (Intel and Apple Silicon)
-- **WSL** (Windows Subsystem for Linux)
+- **Linux** - Arch, Manjaro, Ubuntu
+- **macOS** - Intel and Apple Silicon
+
+**Note:** WSL works as it's Linux - the script detects the distro automatically.
 
 ### Automatic Platform Detection
-- System packages use appropriate package manager (pacman, apt, dnf, brew)
-- Rust/Cargo installed via rustup (works everywhere)
+- System packages use appropriate package manager (pacman/yay, apt, brew)
+- Rust/Cargo installed via rustup (universal)
 - Go installed from official binaries (auto-detects architecture)
 - Wayland-specific configs (Waybar, Hyprland) only on Wayland systems
+- Omarchy theme integration (optional, for Hyprland on Arch)
 
 ## Installation Process
 
@@ -98,7 +106,7 @@ When you run `./install.sh`, it will:
 ### Updating Existing Installation
 
 ```bash
-cd ~/dev/briananderson1222/tools
+cd tools  # or wherever you cloned the repo
 git pull
 ./install.sh
 ```
@@ -110,7 +118,7 @@ The script is idempotent - it safely re-runs and updates everything.
 When you update your configurations locally, sync them back:
 
 ```bash
-cd ~/dev/briananderson1222/tools
+cd tools  # or wherever you cloned the repo
 
 # Copy updated configs (these are symlinked, so may already be up to date)
 cp -r ~/.config/nvim config/
