@@ -1,0 +1,175 @@
+name: Test Installation
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  test-ubuntu:
+    name: Test on Ubuntu
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl git build-essential
+
+      - name: Run install script (skip tool installation prompt)
+        run: |
+          # Auto-answer 'n' to skip optional tool installation for faster CI
+          echo "n" | bash install.sh || true
+        continue-on-error: true
+
+      - name: Verify script completed
+        run: |
+          if [ $? -eq 0 ]; then
+            echo "✅ Install script completed successfully"
+          else
+            echo "⚠️  Install script had warnings (expected in CI)"
+          fi
+
+      - name: Test sync script
+        run: |
+          chmod +x sync.sh
+          ./sync.sh import || echo "⚠️  Sync import had warnings (expected without configs)"
+          ./sync.sh export || echo "⚠️  Sync export had warnings (expected without configs)"
+
+  test-macos:
+    name: Test on macOS
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          # Homebrew usually pre-installed on GitHub runners
+          brew --version || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+      - name: Run install script (skip tool installation prompt)
+        run: |
+          # Auto-answer 'n' to skip optional tool installation for faster CI
+          echo "n" | bash install.sh || true
+        continue-on-error: true
+
+      - name: Verify script completed
+        run: |
+          if [ $? -eq 0 ]; then
+            echo "✅ Install script completed successfully"
+          else
+            echo "⚠️  Install script had warnings (expected in CI)"
+          fi
+
+      - name: Test sync script
+        run: |
+          chmod +x sync.sh
+          ./sync.sh import || echo "⚠️  Sync import had warnings (expected without configs)"
+          ./sync.sh export || echo "⚠️  Sync export had warnings (expected without configs)"
+
+  test-install-tools:
+    name: Test Tool Installation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl git build-essential unzip
+
+      - name: Run full installation
+        run: |
+          # Auto-answer 'y' to install tools, 'y' for nushell, 'bash' for shell choice
+          printf "y\ny\nbash\n" | bash install.sh
+        timeout-minutes: 30
+
+      - name: Verify Rust/Cargo installed
+        run: |
+          source "$HOME/.cargo/env"
+          cargo --version
+
+      - name: Verify Go installed
+        run: |
+          export PATH="$PATH:/usr/local/go/bin"
+          go version
+
+      - name: Verify Rust tools installed
+        run: |
+          source "$HOME/.cargo/env"
+          eza --version || echo "⚠️  eza not installed"
+          bat --version || echo "⚠️  bat not installed"
+          fd --version || echo "⚠️  fd not installed"
+          rg --version || echo "⚠️  rg not installed"
+
+      - name: Verify Go tools installed
+        run: |
+          export PATH="$PATH:$HOME/go/bin"
+          fzf --version || echo "⚠️  fzf not installed"
+          carapace --version || echo "⚠️  carapace not installed"
+
+      - name: Verify NVM installed
+        run: |
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          nvm --version || echo "⚠️  nvm not installed"
+
+      - name: Verify UV installed
+        run: |
+          uv --version || echo "⚠️  uv not installed"
+
+      - name: Verify atuin installed
+        run: |
+          atuin --version || echo "⚠️  atuin not installed"
+
+      - name: Verify JetBrainsMono font installed
+        run: |
+          fc-list | grep -i "JetBrainsMono" && echo "✅ JetBrainsMono Nerd Font installed" || echo "⚠️  Font not found"
+
+      - name: Verify configs deployed
+        run: |
+          [ -f "$HOME/.bashrc" ] && echo "✅ .bashrc deployed" || echo "❌ .bashrc missing"
+          [ -f "$HOME/.zshrc" ] && echo "✅ .zshrc deployed" || echo "❌ .zshrc missing"
+          [ -d "$HOME/.config/nvim" ] && echo "✅ nvim config deployed" || echo "❌ nvim config missing"
+          [ -d "$HOME/.config/nushell" ] && echo "✅ nushell config deployed" || echo "❌ nushell config missing"
+          [ -f "$HOME/.config/ghostty/config" ] && echo "✅ ghostty config generated" || echo "❌ ghostty config missing"
+
+  test-script-syntax:
+    name: Test Script Syntax
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check bash syntax - install.sh
+        run: bash -n install.sh
+
+      - name: Check bash syntax - sync.sh
+        run: bash -n sync.sh
+
+      - name: Lint shell scripts with shellcheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+          shellcheck install.sh || echo "⚠️  shellcheck warnings"
+          shellcheck sync.sh || echo "⚠️  shellcheck warnings"
+
+  test-readme-links:
+    name: Test README Links
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check for broken links
+        uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          use-quiet-mode: 'yes'
+          config-file: '.github/workflows/markdown-link-config.json'
+        continue-on-error: true

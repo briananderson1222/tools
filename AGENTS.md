@@ -334,10 +334,24 @@ install_font_name() {
 - [ ] Generated configs have examples in repo
 
 ### Testing on Multiple Platforms
-If you can't test on all platforms:
-1. Note in commit message which platforms were tested
-2. Add clear documentation for platform-specific behavior
-3. Follow existing patterns for other platforms
+
+**GitHub Actions CI:** The repository has automated tests that run on:
+- Ubuntu (latest)
+- macOS (latest)
+- Full installation test with all tools
+- Script syntax validation
+- Markdown link checking
+
+If you can't test locally on all platforms:
+1. Push to a branch and let CI run
+2. Note in commit message which platforms were tested locally
+3. Add clear documentation for platform-specific behavior
+4. Follow existing patterns for other platforms
+
+**Running tests:**
+- Tests run automatically on push to main
+- Tests run on all pull requests
+- Can be triggered manually via GitHub Actions UI
 
 ## Questions?
 

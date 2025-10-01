@@ -2,6 +2,8 @@
 
 Personal configuration files and setup scripts for Unix-based systems (Linux, macOS, WSL).
 
+[![Test Installation](https://github.com/briananderson1222/tools/actions/workflows/test-install.yml/badge.svg)](https://github.com/briananderson1222/tools/actions/workflows/test-install.yml)
+
 ## Quick Start
 
 Clone this repository and run the install script:
